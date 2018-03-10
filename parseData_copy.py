@@ -1,44 +1,47 @@
-
-# coding: utf-8
-
-# In[19]:
-
 import numpy as np
 import pandas as pd
 import csv
 
-
-# # load into matrix 
-
-# In[23]:
+#economy, microsoft, obama, palestine
 
 data_init = []
 
-with open('News_Final.csv', 'r') as csvfile:
+with open('Data/News_Final.csv', 'rb') as csvfile:
     ifile = csv.reader(csvfile)
     next(ifile, None) #skip header
-    
+
     for line in ifile:
+        temp = []
+        fcount = 0
         for val in line:
-            data_init.append(val)
-            
+            if fcount in (0, 1, 2, 3):
+                fcount += 1
+                continue
+            elif fcount == 4:
+                if val == "economy":
+                    temp.append(1)
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(0)
+                elif val == "microsoft":
+                    temp.append(0)
+                    temp.append(1)
+                    temp.append(0)
+                    temp.append(0)
+                elif val == "obama":
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(1)
+                    temp.append(0)
+                else:
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(1)
+            else:
+                temp.append(val)
+            fcount += 1
+        data_init.append(temp)
+
 data_init = np.matrix(data_init)
-data_init = data_init.reshape(93239,11)
-#print(data_init) #looks good!
-
-
-
-# # add columns for topic classification
-
-# In[31]:
-
-N = 93239
-all_data = []
-all_data = np.c_[data_init,np.zeros(N),np.zeros(N),np.zeros(N),np.zeros(N)]
-#now four columns of zeros appended to matrix 
-
-#topic is in 4th column (starting with zero)
-for row in all_data:
-    print(all_data[row,4])
-       
-
+print data_init
