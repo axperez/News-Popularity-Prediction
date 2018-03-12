@@ -2,53 +2,24 @@ import numpy as np
 import pandas as pd
 import csv
 
+
 #economy, microsoft, obama, palestine
 articles = {}
-data_init = []
 
 with open('Data/News_Final.csv', 'rb') as csvfile:
     ifile = csv.reader(csvfile)
     next(ifile, None) #skip header
 
     for line in ifile:
-        temp = []
         instance = []
-        fcount = 0
+        flag = False
         for val in line:
-            if fcount == 0:
-                id_link = val
-                fcount += 1
-                continue
-            instance.append(val)
-            if fcount in (1, 2, 3):
-                fcount += 1
-                continue
-            elif fcount == 4:
-                if val == "economy":
-                    temp.append(1)
-                    temp.append(0)
-                    temp.append(0)
-                    temp.append(0)
-                elif val == "microsoft":
-                    temp.append(0)
-                    temp.append(1)
-                    temp.append(0)
-                    temp.append(0)
-                elif val == "obama":
-                    temp.append(0)
-                    temp.append(0)
-                    temp.append(1)
-                    temp.append(0)
-                else:
-                    temp.append(0)
-                    temp.append(0)
-                    temp.append(0)
-                    temp.append(1)
+            if flag:
+                instance.append(val)
             else:
-                temp.append(val)
-            fcount += 1
+                id_link = val
+                flag = True
         articles[id_link] = instance
-        data_init.append(temp)
 
 topics = {'economy': [], 'microsoft': [], 'obama': [], 'palestine': []}
 
@@ -146,8 +117,6 @@ pal_avg_fb = pal_sum_fb/pal_count_fb
 pal_avg_gp = pal_sum_gp/pal_count_gp
 pal_avg_li = pal_sum_li/pal_count_li
 
-data_init = np.matrix(data_init)
-
 
 for i in articles:
     if articles[i][3] == 'economy':
@@ -178,10 +147,40 @@ for i in articles:
             articles[i][8] = pal_avg_gp
         if float(articles[i][9]) == -1.:
             articles[i][9] = pal_avg_li
-'''
-print econ_avg_fb, econ_avg_gp, econ_avg_li
-print micro_avg_fb, micro_avg_gp, micro_avg_li
-print obama_avg_fb, obama_avg_gp, obama_avg_li
-print pal_avg_fb, pal_avg_gp, pal_avg_li
-'''
-print articles
+
+data_init = []
+for i in articles:
+    temp = []
+    fcount = 0
+    for val in articles[i]:
+        if fcount in (0, 1, 2):
+            fcount += 1
+            continue
+        elif fcount == 3:
+            if val == "economy":
+                temp.append(1)
+                temp.append(0)
+                temp.append(0)
+                temp.append(0)
+            elif val == "microsoft":
+                temp.append(0)
+                temp.append(1)
+                temp.append(0)
+                temp.append(0)
+            elif val == "obama":
+                temp.append(0)
+                temp.append(0)
+                temp.append(1)
+                temp.append(0)
+            else:
+                temp.append(0)
+                temp.append(0)
+                temp.append(0)
+                temp.append(1)
+        else:
+            temp.append(float(val))
+        fcount += 1
+    data_init.append(temp)
+
+data_init = np.matrix(data_init)
+print data_init
