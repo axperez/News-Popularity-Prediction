@@ -1,14 +1,16 @@
 import numpy as np
 import pandas as pd
 import csv
+from datetime import datetime
 
 #economy, microsoft, obama, palestine
 articles = {}
 data_init = []
 
-with open('Data/News_Final.csv', 'rb') as csvfile:
+with open('Data/News_Final.csv', 'r') as csvfile:
     ifile = csv.reader(csvfile)
-    next(ifile, None) #skip header
+    #skip header
+    next(ifile, None)
 
     for line in ifile:
         temp = []
@@ -178,10 +180,18 @@ for i in articles:
             articles[i][8] = pal_avg_gp
         if float(articles[i][9]) == -1.:
             articles[i][9] = pal_avg_li
+
+start_date = '1970-01-01 '
+for i in articles:
+    date = articles[i][4].split(" ")
+    date = start_date + date[1]
+    datetime_object = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    datetime_object = datetime_object.timestamp()
+    articles[i][4]=datetime_object
 '''
 print econ_avg_fb, econ_avg_gp, econ_avg_li
 print micro_avg_fb, micro_avg_gp, micro_avg_li
 print obama_avg_fb, obama_avg_gp, obama_avg_li
 print pal_avg_fb, pal_avg_gp, pal_avg_li
 '''
-print articles
+print(articles['1'])
