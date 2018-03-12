@@ -1,44 +1,187 @@
-
-# coding: utf-8
-
-# In[19]:
-
 import numpy as np
 import pandas as pd
 import csv
 
-
-# # load into matrix 
-
-# In[23]:
-
+#economy, microsoft, obama, palestine
+articles = {}
 data_init = []
 
-with open('News_Final.csv', 'r') as csvfile:
+with open('Data/News_Final.csv', 'rb') as csvfile:
     ifile = csv.reader(csvfile)
     next(ifile, None) #skip header
-    
+
     for line in ifile:
+        temp = []
+        instance = []
+        fcount = 0
         for val in line:
-            data_init.append(val)
-            
+            if fcount == 0:
+                id_link = val
+                fcount += 1
+                continue
+            instance.append(val)
+            if fcount in (1, 2, 3):
+                fcount += 1
+                continue
+            elif fcount == 4:
+                if val == "economy":
+                    temp.append(1)
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(0)
+                elif val == "microsoft":
+                    temp.append(0)
+                    temp.append(1)
+                    temp.append(0)
+                    temp.append(0)
+                elif val == "obama":
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(1)
+                    temp.append(0)
+                else:
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(0)
+                    temp.append(1)
+            else:
+                temp.append(val)
+            fcount += 1
+        articles[id_link] = instance
+        data_init.append(temp)
+
+topics = {'economy': [], 'microsoft': [], 'obama': [], 'palestine': []}
+
+for i in articles:
+    if articles[i][3] == 'economy':
+        topics['economy'].append(i)
+    elif articles[i][3] == 'microsoft':
+        topics['microsoft'].append(i)
+    elif articles[i][3] == 'obama':
+        topics['obama'].append(i)
+    else:
+        topics['palestine'].append(i)
+
+econ_sum_fb = 0
+econ_sum_gp = 0
+econ_sum_li = 0
+econ_count_fb = 0
+econ_count_gp = 0
+econ_count_li = 0
+
+for i in topics['economy']:
+    if float(articles[i][7]) != -1.:
+        econ_sum_fb += float(articles[i][7])
+        econ_count_fb += 1.
+    if float(articles[i][8]) != -1.:
+        econ_sum_gp += float(articles[i][8])
+        econ_count_gp += 1.
+    if float(articles[i][9]) != -1.:
+        econ_sum_li += float(articles[i][9])
+        econ_count_li += 1.
+econ_avg_fb = econ_sum_fb/econ_count_fb
+econ_avg_gp = econ_sum_gp/econ_count_gp
+econ_avg_li = econ_sum_li/econ_count_li
+
+micro_sum_fb = 0
+micro_sum_gp = 0
+micro_sum_li = 0
+micro_count_fb = 0
+micro_count_gp = 0
+micro_count_li = 0
+
+for i in topics['microsoft']:
+    if float(articles[i][7]) != -1.:
+        micro_sum_fb += float(articles[i][7])
+        micro_count_fb += 1.
+    if float(articles[i][8]) != -1.:
+        micro_sum_gp += float(articles[i][8])
+        micro_count_gp += 1.
+    if float(articles[i][9]) != -1.:
+        micro_sum_li += float(articles[i][9])
+        micro_count_li += 1.
+micro_avg_fb = micro_sum_fb/micro_count_fb
+micro_avg_gp = micro_sum_gp/micro_count_gp
+micro_avg_li = micro_sum_li/micro_count_li
+
+obama_sum_fb = 0
+obama_sum_gp = 0
+obama_sum_li = 0
+obama_count_fb = 0
+obama_count_gp = 0
+obama_count_li = 0
+
+for i in topics['obama']:
+    if float(articles[i][7]) != -1.:
+        obama_sum_fb += float(articles[i][7])
+        obama_count_fb += 1.
+    if float(articles[i][8]) != -1.:
+        obama_sum_gp += float(articles[i][8])
+        obama_count_gp += 1.
+    if float(articles[i][9]) != -1.:
+        obama_sum_li += float(articles[i][9])
+        obama_count_li += 1.
+obama_avg_fb = obama_sum_fb/obama_count_fb
+obama_avg_gp = obama_sum_gp/obama_count_gp
+obama_avg_li = obama_sum_li/obama_count_li
+
+pal_sum_fb = 0
+pal_sum_gp = 0
+pal_sum_li = 0
+pal_count_fb = 0
+pal_count_gp = 0
+pal_count_li = 0
+
+for i in topics['palestine']:
+    if float(articles[i][7]) != -1.:
+        pal_sum_fb += float(articles[i][7])
+        pal_count_fb += 1.
+    if float(articles[i][8]) != -1.:
+        pal_sum_gp += float(articles[i][8])
+        pal_count_gp += 1.
+    if float(articles[i][9]) != -1.:
+        pal_sum_li += float(articles[i][9])
+        pal_count_li += 1.
+pal_avg_fb = pal_sum_fb/pal_count_fb
+pal_avg_gp = pal_sum_gp/pal_count_gp
+pal_avg_li = pal_sum_li/pal_count_li
+
 data_init = np.matrix(data_init)
-data_init = data_init.reshape(93239,11)
-#print(data_init) #looks good!
 
 
-
-# # add columns for topic classification
-
-# In[31]:
-
-N = 93239
-all_data = []
-all_data = np.c_[data_init,np.zeros(N),np.zeros(N),np.zeros(N),np.zeros(N)]
-#now four columns of zeros appended to matrix 
-
-#topic is in 4th column (starting with zero)
-for row in all_data:
-    print(all_data[row,4])
-       
-
+for i in articles:
+    if articles[i][3] == 'economy':
+        if float(articles[i][7]) == -1.:
+            articles[i][7] = econ_avg_fb
+        if float(articles[i][8]) == -1.:
+            articles[i][8] = econ_avg_gp
+        if float(articles[i][9]) == -1.:
+            articles[i][9] = econ_avg_li
+    elif articles[i][3] == 'microsoft':
+        if float(articles[i][7]) == -1.:
+            articles[i][7] = micro_avg_fb
+        if float(articles[i][8]) == -1.:
+            articles[i][8] = micro_avg_gp
+        if float(articles[i][9]) == -1.:
+            articles[i][9] = micro_avg_li
+    elif articles[i][3] == 'obama':
+        if float(articles[i][7]) == -1.:
+            articles[i][7] = obama_avg_fb
+        if float(articles[i][8]) == -1.:
+            articles[i][8] = obama_avg_gp
+        if float(articles[i][9]) == -1.:
+            articles[i][9] = obama_avg_li
+    else:
+        if float(articles[i][7]) == -1.:
+            articles[i][7] = pal_avg_fb
+        if float(articles[i][8]) == -1.:
+            articles[i][8] = pal_avg_gp
+        if float(articles[i][9]) == -1.:
+            articles[i][9] = pal_avg_li
+'''
+print econ_avg_fb, econ_avg_gp, econ_avg_li
+print micro_avg_fb, micro_avg_gp, micro_avg_li
+print obama_avg_fb, obama_avg_gp, obama_avg_li
+print pal_avg_fb, pal_avg_gp, pal_avg_li
+'''
+print articles
