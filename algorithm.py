@@ -4,6 +4,11 @@ import csv
 from datetime import datetime
 import sklearn
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import RidgeCV
+from sklearn import linear_model
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.datasets import make_regression
 
 def parsedata(filename):
     articles = {}
@@ -169,6 +174,9 @@ def prepare_data(data):
     return data_dict
 
 def linear_regression(data_dict):
+    #########################################################################################################
+    #LINEAR REGRESSION
+
     lm1 = LinearRegression()
     lm2 = LinearRegression()
     lm3 = LinearRegression()
@@ -177,6 +185,7 @@ def linear_regression(data_dict):
     lm2.fit(data_dict['X']['TR']['gp'], data_dict['Y']['TR']['gp'])
     lm3.fit(data_dict['X']['TR']['li'], data_dict['Y']['TR']['li'])
 
+    print('Linear Regression Model:')
     print ('FB:', pd.DataFrame(list(zip(data_dict['X']['TR']['fb'].columns, lm1.coef_)), columns = ['Features', 'EstimatedCoefficients']))
     print ('GP:', pd.DataFrame(list(zip(data_dict['X']['TR']['gp'].columns, lm2.coef_)), columns = ['Features', 'EstimatedCoefficients']))
     print ('LI:', pd.DataFrame(list(zip(data_dict['X']['TR']['li'].columns, lm3.coef_)), columns = ['Features', 'EstimatedCoefficients']))
@@ -185,7 +194,64 @@ def linear_regression(data_dict):
     error_gp = np.sqrt(np.mean((data_dict['Y']['TE']['gp'] - lm2.predict(data_dict['X']['TE']['gp'])) ** 2))
     error_li = np.sqrt(np.mean((data_dict['Y']['TE']['li'] - lm3.predict(data_dict['X']['TE']['li'])) ** 2))
 
-    print ('FB Error:', error_fb, '\nGP Error:', error_gp, '\nLI Error:', error_li)
+    print ('FB Error:', error_fb, '\nGP Error:', error_gp, '\nLI Error:', error_li, '\n')
+
+def ridge_regression(data_dict):
+    #########################################################################################################
+    #RIDGE REGRESSION
+    reg1 = linear_model.RidgeCV(alphas=[0.1, 1.0, 10.0, 20.0, 30.0, 50.0, 70.0, 85.0, 100.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 150.0, 175.0, 200.0])
+    reg2 = linear_model.RidgeCV(alphas=[0.1, 1.0, 10.0, 20.0, 30.0, 50.0, 70.0, 85.0, 100.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 150.0, 155.0, 160.0, 165.0, 170.0, 175.0, 180.0, 185.0, 190.0, 200.0])
+    reg3 = linear_model.RidgeCV(alphas=[110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 150.0, 175.0, 180.0, 185.0, 190.0, 195.0, 200.0, 205.0, 210.0, 215.0, 220.0, 225.0, 230.0, 235.0, 240.0, 245.0, 250.0, 255.0, 260.0, 265.0, 270.0, 275.0])
+
+    reg1.fit(data_dict['X']['TR']['fb'], data_dict['Y']['TR']['fb'])
+    reg2.fit(data_dict['X']['TR']['gp'], data_dict['Y']['TR']['gp'])
+    reg3.fit(data_dict['X']['TR']['li'], data_dict['Y']['TR']['li'])
+
+    #print(reg1.alpha_) #125
+    #print(reg2.alpha_) #170
+    #print(reg3.alpha_) #265
+
+    reg1 = linear_model.Ridge (alpha = reg1.alpha_)
+    reg2 = linear_model.Ridge (alpha = reg2.alpha_)
+    reg3 = linear_model.Ridge (alpha = reg3.alpha_)
+
+    reg1.fit(data_dict['X']['TR']['fb'], data_dict['Y']['TR']['fb'])
+    reg2.fit(data_dict['X']['TR']['gp'], data_dict['Y']['TR']['gp'])
+    reg3.fit(data_dict['X']['TR']['li'], data_dict['Y']['TR']['li'])
+
+    print('Ridge Regression Model:')
+    print ('FB:', pd.DataFrame(list(zip(data_dict['X']['TR']['fb'].columns, reg1.coef_)), columns = ['Features', 'EstimatedCoefficients']))
+    print ('GP:', pd.DataFrame(list(zip(data_dict['X']['TR']['gp'].columns, reg2.coef_)), columns = ['Features', 'EstimatedCoefficients']))
+    print ('LI:', pd.DataFrame(list(zip(data_dict['X']['TR']['li'].columns, reg3.coef_)), columns = ['Features', 'EstimatedCoefficients']))
+
+    error_fb = np.sqrt(np.mean((data_dict['Y']['TE']['fb'] - reg1.predict(data_dict['X']['TE']['fb'])) ** 2))
+    error_gp = np.sqrt(np.mean((data_dict['Y']['TE']['gp'] - reg3.predict(data_dict['X']['TE']['gp'])) ** 2))
+    error_li = np.sqrt(np.mean((data_dict['Y']['TE']['li'] - reg3.predict(data_dict['X']['TE']['li'])) ** 2))
+
+    print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li, '\n')
+
+def random_forest_regr(data_dict):
+    #########################################################################################################
+    #RANDOM FOREST REGRESSOR
+    regr1 = RandomForestRegressor(n_estimators=7)
+    regr2 = RandomForestRegressor(n_estimators=7)
+    regr3 = RandomForestRegressor(n_estimators=7)
+
+    regr1.fit(data_dict['X']['TR']['fb'], data_dict['Y']['TR']['fb'])
+    regr2.fit(data_dict['X']['TR']['gp'], data_dict['Y']['TR']['gp'])
+    regr3.fit(data_dict['X']['TR']['li'], data_dict['Y']['TR']['li'])
+
+    print('Random Forest Regressor:')
+    print ('FB:', pd.DataFrame(list(zip(data_dict['X']['TR']['fb'].columns, regr1.feature_importances_)), columns = ['Features', 'EstimatedCoefficients']))
+    print ('GP:', pd.DataFrame(list(zip(data_dict['X']['TR']['gp'].columns, regr2.feature_importances_)), columns = ['Features', 'EstimatedCoefficients']))
+    print ('LI:', pd.DataFrame(list(zip(data_dict['X']['TR']['li'].columns, regr3.feature_importances_)), columns = ['Features', 'EstimatedCoefficients']))
+
+    error_fb = np.sqrt(np.mean((data_dict['Y']['TE']['fb'] - regr1.predict(data_dict['X']['TE']['fb'])) ** 2))
+    error_gp = np.sqrt(np.mean((data_dict['Y']['TE']['gp'] - regr2.predict(data_dict['X']['TE']['gp'])) ** 2))
+    error_li = np.sqrt(np.mean((data_dict['Y']['TE']['li'] - regr3.predict(data_dict['X']['TE']['li'])) ** 2))
+
+    print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li, '\n')
+
 
 if __name__ == "__main__":
     articles = parsedata('Data/News_Final.csv')
@@ -195,3 +261,5 @@ if __name__ == "__main__":
     data = create_dataframe(articles)
     data_dict = prepare_data(data)
     linear_regression(data_dict)
+    ridge_regression(data_dict)
+    random_forest_regr(data_dict)
