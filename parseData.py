@@ -8,6 +8,10 @@ from sklearn.linear_model import Ridge
 from sklearn.linear_model import RidgeCV
 from sklearn import linear_model
 #economy, microsoft, obama, palestine
+
+#########################################################################################################
+#PARSING DATA
+
 articles = {}
 
 with open('Data/News_Final.csv', 'r') as csvfile:
