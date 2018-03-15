@@ -224,8 +224,8 @@ print ('FB:', pd.DataFrame(list(zip(TR_X_fb.columns, lm1.coef_)), columns = ['Fe
 print ('GP:', pd.DataFrame(list(zip(TR_X_gp.columns, lm2.coef_)), columns = ['Features', 'EstimatedCoefficients']))
 print ('LI:', pd.DataFrame(list(zip(TR_X_li.columns, lm3.coef_)), columns = ['Features', 'EstimatedCoefficients']))
 
-error_fb = np.mean((TE_Y_fb - lm1.predict(TE_X_fb)) ** 2)
-error_gp = np.mean((TE_Y_gp - lm2.predict(TE_X_gp)) ** 2)
-error_li = np.mean((TE_Y_li - lm3.predict(TE_X_li)) ** 2)
+error_fb = np.sqrt(np.mean((TE_Y_fb - lm1.predict(TE_X_fb)) ** 2))
+error_gp = np.sqrt(np.mean((TE_Y_gp - lm2.predict(TE_X_gp)) ** 2))
+error_li = np.sqrt(np.mean((TE_Y_li - lm3.predict(TE_X_li)) ** 2))
 
 print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li)
