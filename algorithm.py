@@ -174,9 +174,6 @@ def prepare_data(data):
     return data_dict
 
 def linear_regression(data_dict):
-    #########################################################################################################
-    #LINEAR REGRESSION
-
     lm1 = LinearRegression()
     lm2 = LinearRegression()
     lm3 = LinearRegression()
@@ -197,8 +194,6 @@ def linear_regression(data_dict):
     print ('FB Error:', error_fb, '\nGP Error:', error_gp, '\nLI Error:', error_li, '\n')
 
 def ridge_regression(data_dict):
-    #########################################################################################################
-    #RIDGE REGRESSION
     reg1 = linear_model.RidgeCV(alphas=[0.1, 1.0, 10.0, 20.0, 30.0, 50.0, 70.0, 85.0, 100.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 150.0, 175.0, 200.0])
     reg2 = linear_model.RidgeCV(alphas=[0.1, 1.0, 10.0, 20.0, 30.0, 50.0, 70.0, 85.0, 100.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 150.0, 155.0, 160.0, 165.0, 170.0, 175.0, 180.0, 185.0, 190.0, 200.0])
     reg3 = linear_model.RidgeCV(alphas=[110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 150.0, 175.0, 180.0, 185.0, 190.0, 195.0, 200.0, 205.0, 210.0, 215.0, 220.0, 225.0, 230.0, 235.0, 240.0, 245.0, 250.0, 255.0, 260.0, 265.0, 270.0, 275.0])
@@ -231,8 +226,6 @@ def ridge_regression(data_dict):
     print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li, '\n')
 
 def random_forest_regr(data_dict):
-    #########################################################################################################
-    #RANDOM FOREST REGRESSOR
     regr1 = RandomForestRegressor(n_estimators=7)
     regr2 = RandomForestRegressor(n_estimators=7)
     regr3 = RandomForestRegressor(n_estimators=7)
