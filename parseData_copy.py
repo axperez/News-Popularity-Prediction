@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import csv
 from datetime import datetime
-
+import sklearn
+from sklearn.linear_model import LinearRegression
 
 #economy, microsoft, obama, palestine
 articles = {}
@@ -10,7 +11,6 @@ articles = {}
 with open('Data/News_Final.csv', 'r') as csvfile:
     ifile = csv.reader(csvfile)
     next(ifile, None) #skip header
-
     for line in ifile:
         instance = []
         flag = False
@@ -154,7 +154,7 @@ for i in articles:
     date = articles[i][4].split(" ")
     date = start_date + date[1]
     datetime_object = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-    datetime_object = datetime_object.timestamp()
+    datetime_object = datetime_object.timestamp() - 28800.
     articles[i][4]=datetime_object
 
 data_init = []
@@ -191,5 +191,41 @@ for i in articles:
         fcount += 1
     data_init.append(temp)
 
-data_init = np.matrix(data_init)
-print(data_init[1,:])
+'''
+print(micro_avg_fb, micro_avg_gp, micro_avg_li)
+print(econ_avg_fb, econ_avg_gp, econ_avg_li)
+print(obama_avg_fb, obama_avg_gp, obama_avg_li)
+print(pal_avg_fb, pal_avg_gp, pal_avg_li)
+'''
+
+data = pd.DataFrame(np.matrix(data_init))
+
+data.columns = ['Economy', 'Microsoft', 'Obama', 'Palestine', 'Time (s)', 'SentimentTitle', 'SentimentHeadline', 'Facebook', 'GooglePlus', 'LinkedIn']
+
+X = data.drop(['Facebook', 'GooglePlus', 'LinkedIn'], axis = 1)
+
+Y_fb = data.Facebook
+Y_gp = data.GooglePlus
+Y_li = data.LinkedIn
+
+TR_X_fb, TE_X_fb, TR_Y_fb, TE_Y_fb = sklearn.model_selection.train_test_split(X, Y_fb, test_size = 0.2, random_state = 5)
+TR_X_gp, TE_X_gp, TR_Y_gp, TE_Y_gp = sklearn.model_selection.train_test_split(X, Y_gp, test_size = 0.2, random_state = 5)
+TR_X_li, TE_X_li, TR_Y_li, TE_Y_li = sklearn.model_selection.train_test_split(X, Y_li, test_size = 0.2, random_state = 5)
+
+
+lm1 = LinearRegression()
+lm2 = LinearRegression()
+lm3 = LinearRegression()
+lm1.fit(TR_X_fb, TR_Y_fb)
+lm2.fit(TR_X_gp, TR_Y_gp)
+lm3.fit(TR_X_li, TR_Y_li)
+
+print ('FB:', pd.DataFrame(list(zip(TR_X_fb.columns, lm1.coef_)), columns = ['Features', 'EstimatedCoefficients']))
+print ('GP:', pd.DataFrame(list(zip(TR_X_gp.columns, lm2.coef_)), columns = ['Features', 'EstimatedCoefficients']))
+print ('LI:', pd.DataFrame(list(zip(TR_X_li.columns, lm3.coef_)), columns = ['Features', 'EstimatedCoefficients']))
+
+error_fb = np.mean((TE_Y_fb - lm1.predict(TE_X_fb)) ** 2)
+error_gp = np.mean((TE_Y_gp - lm2.predict(TE_X_gp)) ** 2)
+error_li = np.mean((TE_Y_li - lm3.predict(TE_X_li)) ** 2)
+
+print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li)
