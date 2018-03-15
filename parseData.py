@@ -7,6 +7,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import RidgeCV
 from sklearn import linear_model
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.datasets import make_regression
 #economy, microsoft, obama, palestine
 
 #########################################################################################################
@@ -262,5 +264,28 @@ print ('LI:', pd.DataFrame(list(zip(TR_X_li.columns, reg3.coef_)), columns = ['F
 error_fb = np.mean((TE_Y_fb - reg1.predict(TE_X_fb)) ** 2)
 error_gp = np.mean((TE_Y_gp - reg3.predict(TE_X_gp)) ** 2)
 error_li = np.mean((TE_Y_li - reg3.predict(TE_X_li)) ** 2)
+
+print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li)
+print('\n')
+
+#########################################################################################################
+#RANDOM FOREST REGRESSOR
+print('Random Forest Regressor:')
+
+regr1 = RandomForestRegressor(n_estimators=7)
+regr2 = RandomForestRegressor(n_estimators=7)
+regr3 = RandomForestRegressor(n_estimators=7)
+
+regr1.fit(TR_X_fb, TR_Y_fb)
+regr2.fit(TR_X_gp, TR_Y_gp)
+regr3.fit(TR_X_li, TR_Y_li)
+
+print ('FB:', pd.DataFrame(list(zip(TR_X_fb.columns, regr1.feature_importances_)), columns = ['Features', 'EstimatedFeatureImportances']))
+print ('GP:', pd.DataFrame(list(zip(TR_X_gp.columns, regr2.feature_importances_)), columns = ['Features', 'EstimatedFeatureImportances']))
+print ('LI:', pd.DataFrame(list(zip(TR_X_li.columns, regr3.feature_importances_)), columns = ['Features', 'EstimatedFeatureImportances']))
+
+error_fb = np.mean((TE_Y_fb - reg1.predict(TE_X_fb)) ** 2)
+error_gp = np.mean((TE_Y_gp - regr2.predict(TE_X_gp)) ** 2)
+error_li = np.mean((TE_Y_li - regr3.predict(TE_X_li)) ** 2)
 
 print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li)
