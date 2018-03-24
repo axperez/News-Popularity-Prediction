@@ -1,3 +1,9 @@
+'''
+Axel Perez
+Rachel Goldstein
+COEN 140 Final Project
+3/23/18
+'''
 import numpy as np
 import pandas as pd
 import csv
@@ -9,6 +15,9 @@ from sklearn.linear_model import RidgeCV
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.datasets import make_regression
+from sklearn.decomposition import PCA as sklearnPCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
 def parsedata(filename):
     articles = {}
@@ -112,6 +121,8 @@ def add_seconds_from_date(articles):
         date = start_date + date[1]
         articles[i][4] = get_seconds(date)
 
+    return articles
+
 def get_seconds(date):
     datetime_object = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     return datetime_object.timestamp() - 28800.
@@ -156,8 +167,13 @@ def create_dataframe(articles):
 
     return data
 
-def prepare_data(data):
+def prepare_data(data, if_pca):
     X = data.drop(['Facebook', 'GooglePlus', 'LinkedIn'], axis = 1)
+    print (X.shape)
+    if if_pca:
+        X = PCA(X)
+        print (X.shape)
+        X.columns = ['Comp1', 'Comp2']
     Y_fb = data.Facebook
     Y_gp = data.GooglePlus
     Y_li = data.LinkedIn
@@ -172,6 +188,23 @@ def prepare_data(data):
     data_dict['X']['TR']['li'], data_dict['X']['TE']['li'], data_dict['Y']['TR']['li'], data_dict['Y']['TE']['li'] = sklearn.model_selection.train_test_split(X, Y_li, test_size = 0.2, random_state = 5)
 
     return data_dict
+
+def PCA(X):
+    pca = sklearnPCA(n_components=2) #2-dimensional pca
+
+    X = StandardScaler().fit_transform(X)
+
+    X = pd.DataFrame(pca.fit_transform(X))
+
+    plt.scatter(X.values[:, 0], X.values[:, 1], label='data', c='red')
+
+    plt.xlabel('component 1')
+    plt.ylabel('component 2')
+
+    plt.legend()
+    plt.show()
+
+    return X
 
 def linear_regression(data_dict):
     lm1 = LinearRegression()
@@ -245,14 +278,41 @@ def random_forest_regr(data_dict):
 
     print ('FB Error:', error_fb, '\n', 'GP Error:', error_gp, '\n', 'LI Error:', error_li, '\n')
 
+def NaiveError(data_dict, articles, topics):
+    econ_avg_fb, econ_avg_gp, econ_avg_li = get_avg_pop(articles, topics, 'economy')
+    micro_avg_fb, micro_avg_gp, micro_avg_li = get_avg_pop(articles, topics, 'microsoft')
+    obama_avg_fb, obama_avg_gp, obama_avg_li = get_avg_pop(articles, topics, 'obama')
+    pal_avg_fb, pal_avg_gp, pal_avg_li = get_avg_pop(articles, topics, 'palestine')
+
+    avg_fb = (obama_avg_fb + micro_avg_fb + pal_avg_fb + econ_avg_fb)/4.
+    avg_gp = (obama_avg_gp + micro_avg_gp + pal_avg_gp + econ_avg_gp)/4.
+    avg_li = (obama_avg_li + micro_avg_li + pal_avg_li + econ_avg_li)/4.
+    error_fb = 0
+    error_gp = 0
+    error_li = 0
+    for i in data_dict['Y']['TE']['fb']:
+        error_fb += ((i - avg_fb) ** 2)
+    for i in data_dict['Y']['TE']['gp']:
+        error_gp += ((i - avg_gp) ** 2)
+    for i in data_dict['Y']['TE']['li']:
+        error_li += ((i - avg_li) ** 2)
+
+    print('naive fb error:', error_fb, 'naive gp error:', error_gp, 'naive li error:', error_li)
 
 if __name__ == "__main__":
     articles = parsedata('Data/News_Final.csv')
     topics = organize_topics(articles)
-    replace_NegOnes(articles, topics)
-    add_seconds_from_date(articles)
+    articles = replace_NegOnes(articles, topics)
+    articles = add_seconds_from_date(articles)
     data = create_dataframe(articles)
-    data_dict = prepare_data(data)
+    data_dict = prepare_data(data, True)
+    NaiveError(data_dict, articles, topics)
+    print ('########################################')
+    linear_regression(data_dict)
+    ridge_regression(data_dict)
+    random_forest_regr(data_dict)
+    print ('########################################')
+    data_dict = prepare_data(data, False)
     linear_regression(data_dict)
     ridge_regression(data_dict)
     random_forest_regr(data_dict)
